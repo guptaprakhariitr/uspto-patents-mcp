@@ -165,10 +165,22 @@ export class PatentsViewClient {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "User-Agent": "uspto-patents-mcp/0.2 (prakshatechnologies@gmail.com)",
         ...(this.env.PATENTSVIEW_API_KEY ? { "X-Api-Key": this.env.PATENTSVIEW_API_KEY } : {}),
       },
       body: JSON.stringify(body),
     });
+    // The original PatentsView v1 API was sunset in 2025 — api.patentsview.org
+    // now 301-redirects to USPTO's Open Data Portal at data.uspto.gov/odp.
+    // We detect the HTML response and surface a helpful error rather than the
+    // confusing "Unexpected token '<'" JSON parse failure.
+    const ct = r.headers.get("content-type") || "";
+    if (!ct.includes("application/json")) {
+      throw new Error(
+        "PatentsView v1 API has been sunset by USPTO. Migrate to data.uspto.gov/odp " +
+        "(requires API key registration). See https://data.uspto.gov/support/transition-guide/patentsview"
+      );
+    }
     if (!r.ok) {
       const txt = await r.text();
       throw new Error(`PatentsView ${r.status}: ${txt.slice(0, 200)}`);

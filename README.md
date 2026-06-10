@@ -1,8 +1,10 @@
-# uspto-patents-mcp — SCAFFOLD
+# uspto-patents-mcp
 
-> US patent search, full-text retrieval, claim extraction, weekly alerts on technology areas. Wraps **USPTO PatentsView API** + USPTO bulk data. Pairs with `sec-edgar-mcp` and `fda-approvals-mcp` for the R&D / biotech / IP-law audience.
+> US patent search, full-text retrieval, claim extraction, citation graph, weekly grant alerts. Pairs with `sec-edgar-mcp` and `fda-approvals-mcp` for the R&D / biotech / IP-law audience.
 
-**Status:** scaffolded. Idea #3 in [`../../../ai-as-customer-ideas.md`](../../../ai-as-customer-ideas.md).
+> ⚠️ **UPSTREAM API MIGRATION REQUIRED (as of 2025/2026).** USPTO sunset the PatentsView v1 API and migrated everything to the [Open Data Portal](https://data.uspto.gov/) at `data.uspto.gov/odp`. The new API requires registration + API key. This MCP's code shape is correct; only the upstream URL + auth method changes. Tracking issue: PatentsView v1 endpoints now 301-redirect to USPTO's transition guide. **All tools will currently surface the migration message until the new endpoint is wired.**
+
+**Status:** code green, infra live (`https://uspto-patents-mcp.prakhar-cognizance.workers.dev`), tests passing, awaiting USPTO ODP API key + migration to v2 schema.
 
 ---
 
