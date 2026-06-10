@@ -16,6 +16,13 @@
 - Optional Resend integration: API key emailed to the customer on subscription start.
 
 
+## [0.1.3] — 2026-06-10 (intra-day patch)
+
+### Documentation
+- Marked upstream-API migration as required: USPTO sunset the PatentsView v1 API in 2025 and migrated everything to data.uspto.gov/odp (requires API key registration).
+- `post()` now detects HTML responses (the 301-redirected transition guide) and surfaces a clear migration message instead of the cryptic "Unexpected token '<'" JSON parse error.
+- Code structure preserved — re-pointing to the ODP API + adding an `USPTO_ODP_KEY` secret will restore functionality without rewriting tool surfaces.
+
 ## [0.1.2] — 2026-06-02
 
 ### Fixed
