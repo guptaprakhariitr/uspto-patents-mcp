@@ -25,7 +25,7 @@ Auto-crawls GitHub by repo topic `mcp-server`. Already tagged. Indexes within 24
 - **Display name:** `USPTO Patents`
 - **Description:** `US patent search and full-text via USPTO PatentsView. Assignee portfolios, citation graph, weekly grant alerts.`
 - **GitHub URL:** `https://github.com/guptaprakhariitr/uspto-patents-mcp`
-- **Endpoint URL:** `https://uspto-patents-mcp.prakhar-cognizance.workers.dev/mcp`
+- **Endpoint URL:** `https://uspto-patents-mcp.atlasword.workers.dev/mcp`
 - **Tags:** uspto, patents, patentsview, ip-law, biotech, r-and-d
 - **License:** MIT
 - **Transport:** HTTP (remote)
@@ -50,7 +50,7 @@ Auto-crawls GitHub by repo topic `mcp-server`. Already tagged. Indexes within 24
 ### Twitter / X thread template
 > Just shipped uspto-patents-mcp — Model Context Protocol server: us patent search and full-text via uspto patentsview.
 >
-> Endpoint: https://uspto-patents-mcp.prakhar-cognizance.workers.dev/mcp
+> Endpoint: https://uspto-patents-mcp.atlasword.workers.dev/mcp
 > GitHub: https://github.com/guptaprakhariitr/uspto-patents-mcp
 >
 > Free tier available. Paid from $9/mo.

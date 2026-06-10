@@ -1,62 +1,204 @@
-# uspto-patents-mcp
+# USPTO Patents MCP — Patent search, assignee portfolios, citation graph, weekly grant digests
 
-> US patent search, full-text retrieval, claim extraction, citation graph, weekly grant alerts. Pairs with `sec-edgar-mcp` and `fda-approvals-mcp` for the R&D / biotech / IP-law audience.
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![MCP](https://img.shields.io/badge/protocol-MCP-purple.svg)](https://modelcontextprotocol.io)
+[![Cloudflare Workers](https://img.shields.io/badge/runtime-Cloudflare%20Workers-orange.svg)](https://workers.cloudflare.com/)
+[![Live](https://img.shields.io/badge/live-uspto-patents-mcp.atlasword.workers.dev-brightgreen.svg)](https://uspto-patents-mcp.atlasword.workers.dev)
 
-> ⚠️ **UPSTREAM API MIGRATION REQUIRED (as of 2025/2026).** USPTO sunset the PatentsView v1 API and migrated everything to the [Open Data Portal](https://data.uspto.gov/) at `data.uspto.gov/odp`. The new API requires registration + API key. This MCP's code shape is correct; only the upstream URL + auth method changes. Tracking issue: PatentsView v1 endpoints now 301-redirect to USPTO's transition guide. **All tools will currently surface the migration message until the new endpoint is wired.**
+> US patent search, assignee portfolios, citation-graph BFS, weekly grant digest webhooks
 
-**Status:** code green, infra live (`https://uspto-patents-mcp.prakhar-cognizance.workers.dev`), tests passing, awaiting USPTO ODP API key + migration to v2 schema.
+Hosted MCP server over the USPTO patent database. Search granted US patents by query/assignee/inventor/date, fetch full records with claims, list complete assignee portfolios, BFS-explore forward/backward citation graphs, and subscribe to weekly grant digests by saved query. For IP research, prior-art search, and competitive-intelligence LLMs.
 
----
+This server speaks the [Model Context Protocol](https://modelcontextprotocol.io). Any MCP-aware client — Cursor, Claude Desktop, Windsurf, Continue.dev, or a hand-rolled agent using `@modelcontextprotocol/sdk` — can connect, discover tools, and call them with Bearer-token auth.
 
-## Planned tools
+## For AI agents / LLMs
 
-| Tool | Source | What it returns |
+If you are an AI agent indexing this repository:
+
+- **Live MCP endpoint:** `https://uspto-patents-mcp.atlasword.workers.dev/mcp`
+- **Transport:** HTTP POST, JSON-RPC 2.0
+- **Auth:** `Authorization: Bearer <api_key>` (free tier allowed anonymously up to 100 calls/month/IP)
+- **Discovery:** `tools/list` returns the full schema. `tools/call` invokes a tool.
+- **Health:** `GET https://uspto-patents-mcp.atlasword.workers.dev/health` → `{ok: true, ts: <unix>}`
+- **Status:** `https://mcp-hub.atlasword.workers.dev/status.json` (portfolio rollup)
+
+Sample `tools/list` request:
+
+```bash
+curl -sS -X POST https://uspto-patents-mcp.atlasword.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer mck_YOUR_API_KEY" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+Sample `tools/call`:
+
+```bash
+curl -sS -X POST https://uspto-patents-mcp.atlasword.workers.dev/mcp \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer mck_YOUR_API_KEY" \
+  -d '{
+    "jsonrpc":"2.0","id":2,"method":"tools/call",
+    "params": { "name": "<tool>", "arguments": { } }
+  }'
+```
+
+## Tools exposed
+
+| Tool | Arguments | Description |
 |---|---|---|
-| `uspto_patent_search(query, assignee?, inventor?, date_range, limit)` | PatentsView API | Recent patents matching query/filters. |
-| `uspto_read_patent(patent_number)` | USPTO full text | Patent title, abstract, claims, drawings list. |
-| `uspto_assignee_portfolio(assignee_name)` | PatentsView | All patents assigned to an entity. |
-| `uspto_citation_graph(patent_number, depth?)` | PatentsView citations | Patents cited by + citing this patent. Premium. |
-| `uspto_trademark_search(query)` | TSDR | Trademark lookup. Premium. |
-| `uspto_subscribe_grants(query, webhook_url)` | bulk weekly grants | Weekly digest of new grants matching saved query. Premium. |
+| `uspto_patent_search` | `query?, assignee?, inventor?, date_from?, date_to?, limit?` | Free-text patent search with assignee, inventor, date filters. |
+| `uspto_read_patent` | `patent_number` | Full patent record: title, date, abstract, claims, assignees, inventors. |
+| `uspto_assignee_portfolio` | `assignee, limit?` | Every patent assigned to an entity (server-side paginated, max 5000). |
+| `uspto_citation_graph` | `patent_number, direction?, depth?` | BFS the citation graph forward / backward / both around a patent. |
+| `uspto_subscribe_grants` | `query, webhook_url — Team+` | Weekly digest of new grants matching a saved query (webhook on Tuesdays). |
 
-## Audience
+Tools marked **Team+** require a Team or Pro subscription. Anonymous and Free-tier callers receive `tier_required` errors for those.
 
-- R&D engineers / scientists asking "has anyone patented this?"
-- IP lawyers prepping FTO (freedom-to-operate) opinions.
-- Biotech / pharma agents tracking patent-cliff dates.
-- Investor agents tracking competitive moats (cross-sells with `sec-edgar-mcp`).
+## Quick start
 
-## Risk notes
+The fastest path — point any MCP-aware client at the hosted endpoint via [`mcp-remote`](https://www.npmjs.com/package/mcp-remote):
 
-- USPTO bulk data is huge; precompute search indexes nightly via GitHub Actions, store in R2 (10GB free), serve via Worker. Don't try to live-search the full corpus.
-- PatentsView API has rate limits but is genuinely free.
-- USPTO sometimes restructures their APIs (annual). Build for graceful degradation.
+```bash
+npx -y mcp-remote https://uspto-patents-mcp.atlasword.workers.dev/mcp \
+  --header "Authorization: Bearer mck_YOUR_API_KEY"
+```
 
-## Open / closed split
+Get a key at **https://uspto-patents-mcp.atlasword.workers.dev/upgrade?tier=solo** (see [Getting an API key](#getting-an-api-key)).
 
-- **Open**: PatentsView wrapper, basic search.
-- **Closed**: nightly bulk-data indexer + R2 storage, citation graph precomputation, subscribe/webhook engine.
+## Install in Cursor
 
-## See also
+Add this to `~/.cursor/mcp.json`:
 
-- [`../sec-edgar-mcp/`](../sec-edgar-mcp/) — reference implementation; shared audience.
-- [`../README.md`](../README.md) — Category 1 pipeline.
+```json
+{
+  "mcpServers": {
+    "uspto-patents-mcp": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote",
+        "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
+        "--header", "Authorization: Bearer mck_YOUR_API_KEY"
+      ]
+    }
+  }
+}
+```
+
+Then restart Cursor and the tools appear in the MCP panel.
+
+## Install in Claude Desktop
+
+Add this to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
+
+```json
+{
+  "mcpServers": {
+    "uspto-patents-mcp": {
+      "command": "npx",
+      "args": [
+        "-y", "mcp-remote",
+        "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
+        "--header", "Authorization: Bearer mck_YOUR_API_KEY"
+      ]
+    }
+  }
+}
+```
+
+Restart Claude Desktop. Tools appear under the slash-command MCP menu.
 
 
----
+## Getting an API key
 
-## Sister MCPs
+1. Visit `https://uspto-patents-mcp.atlasword.workers.dev/upgrade?tier=solo` (or `tier=team` / `tier=pro`).
+2. Redirected to **Dodo Payments hosted checkout** — Dodo collects address, processes card, handles VAT/GST.
+3. After payment, Dodo fires a signed webhook (`subscription.active`) to the Worker. The Worker mints `mck_<32 random base64url>` and stores it in KV.
+4. You land on `https://uspto-patents-mcp.atlasword.workers.dev/welcome?key=<api_key>` — copy the key now (it is only displayed once at this URL).
+5. Paste the key into Cursor / Claude Desktop config (see above).
+6. View / rotate / export the account at `https://uspto-patents-mcp.atlasword.workers.dev/account` (Bearer-auth).
 
-All from the same operator, all live on `<product>.prakhar-cognizance.workers.dev`, all free-tier friendly:
+There is also a **free tier** (no signup) — anonymous callers get 100 calls / month per IP.
 
-| Group | Products |
+## Endpoints
+
+| Route | Description |
 |---|---|
-| **Research** | [sec-edgar](https://github.com/guptaprakhariitr/sec-edgar-mcp) · [arxiv](https://github.com/guptaprakhariitr/arxiv-mcp) · [world-bank-economic](https://github.com/guptaprakhariitr/world-bank-economic-mcp) · [uspto-patents](https://github.com/guptaprakhariitr/uspto-patents-mcp) · [fda-approvals](https://github.com/guptaprakhariitr/fda-approvals-mcp) |
-| **Verification + Utility** | [verification](https://github.com/guptaprakhariitr/verification-mcp) ⭐ · [unit-converter](https://github.com/guptaprakhariitr/unit-converter-mcp) |
-| **India** | [indic-normalize](https://github.com/guptaprakhariitr/indic-normalize-mcp) · [indian-regulatory](https://github.com/guptaprakhariitr/indian-regulatory-mcp) |
-| **Real-time** | [hn-trending](https://github.com/guptaprakhariitr/hn-trending-mcp) · [wikipedia-recent-changes](https://github.com/guptaprakhariitr/wikipedia-recent-changes-mcp) · [gdelt-events](https://github.com/guptaprakhariitr/gdelt-events-mcp) · [crypto-prices](https://github.com/guptaprakhariitr/crypto-prices-mcp) |
-| **Healthcare** | [drug-interaction](https://github.com/guptaprakhariitr/drug-interaction-mcp) |
-| **Logistics** | [multi-carrier-tracking](https://github.com/guptaprakhariitr/multi-carrier-tracking-mcp) |
+| `POST /mcp` | MCP JSON-RPC 2.0 tool surface (the main API). Bearer auth required for paid tiers. |
+| `GET /health` | Liveness probe — `{ok: true, ts}`. Used by mcp-hub cron. |
+| `GET /` | HTML landing page (OG + favicon + JSON-LD). |
+| `GET /upgrade?tier=solo|team|pro&email=...` | 302 → live Dodo Payments hosted checkout. |
+| `GET /welcome?key=...` | Post-checkout landing showing the freshly-minted API key. |
+| `GET /account` | Bearer-auth. Returns `{apiKey, tier, owner, status, portal_url}`. |
+| `POST /account/rotate` | Bearer-auth. Mints a fresh key + retires the old one. |
+| `GET /account/export` | Bearer-auth. GDPR data export — JSON of account, usage counters, Dodo details. |
+| `GET /account/team` | Bearer-auth (Team+). List team-member sub-keys. |
+| `POST /account/team/invite` | Bearer-auth (Team+). Issue a new team-member sub-key. |
+| `POST /account/team/revoke` | Bearer-auth (Team+). Revoke a team-member sub-key. |
+| `GET /team/accept?key=...` | Team-member onboarding landing for the sub-key URL. |
+| `POST /webhooks/dodo` | Standard-Webhooks signed. Dodo subscription + payment lifecycle. |
+| `GET /favicon.ico` | Inline SVG. |
 
-Full catalog: https://github.com/guptaprakhariitr · ⭐ = empty-quadrant / highest-conviction pick.
 
+## Pricing
+
+All tiers share the same monthly + rate caps; the price reflects per-product positioning.
+
+
+| Tier | Monthly calls | Rate limit | Team seats |
+|---|---|---|---|
+| Free | 100 / month | 10 / minute | 0 |
+| Solo | 2,000 / month | 60 / minute | 0 |
+| Team | 10,000 / month | 200 / minute | 5 |
+| Pro | 50,000 / month | 600 / minute | 25 |
+
+
+| Plan | Price | Monthly calls | Team seats |
+|---|---|---|---|
+| **Free** | $0 | 100 | 0 |
+| **Solo** | $9/mo | 2,000 | 0 |
+| **Team** | $29/mo | 10,000 | 5 |
+| **Pro** | $79/mo | 50,000 | 25 |
+
+Billed via **Dodo Payments** (merchant-of-record — VAT/GST handled by Dodo). Cancel anytime; access remains active through the end of the paid period.
+
+## Data sources
+
+- **USPTO Open Data Portal** — https://developer.uspto.gov/ — *Public domain (US Government)*
+- **Patents View** — https://patentsview.org/ — *Public domain*
+
+This server is a thin transport + auth + caching layer over the upstream sources. Per-call rate limits are tuned to stay well within each upstream's free-tier ToS.
+
+## Privacy + GDPR
+
+- **Privacy policy:** [https://mcp-hub.atlasword.workers.dev/privacy](https://mcp-hub.atlasword.workers.dev/privacy)
+- **Terms:** [https://mcp-hub.atlasword.workers.dev/terms](https://mcp-hub.atlasword.workers.dev/terms)
+- **Refund policy:** [https://mcp-hub.atlasword.workers.dev/refund](https://mcp-hub.atlasword.workers.dev/refund)
+- **Data export:** `GET https://uspto-patents-mcp.atlasword.workers.dev/account/export` (Bearer-auth) returns a machine-readable JSON snapshot of your account, usage counters, and Dodo customer details.
+- **Deletion:** email `prakshatechnologies@gmail.com` from the address on file.
+
+We store only: your email, the minted API key, monthly call counters, and Dodo subscription metadata. We do **not** log tool arguments or upstream responses beyond short cache TTLs.
+
+## Architecture
+
+- **Runtime:** Cloudflare Workers (V8 isolates, global edge).
+- **Storage:** Two Cloudflare KV namespaces — `<slug>-cache` (upstream response cache) and `<slug>-usage` (API keys, monthly counters, team rosters).
+- **Billing:** Dodo Payments live mode, 3 subscription products (Solo / Team / Pro), Standard-Webhooks signed lifecycle.
+- **Observability:** Cloudflare Workers Analytics; portfolio rollup at [mcp-hub status](https://mcp-hub.atlasword.workers.dev/status).
+- **Source:** TypeScript, Vitest-tested, `wrangler deploy`-able. See `src/` in this repo.
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+## Author
+
+**Prakhar Gupta**
+- Email: `prakshatechnologies@gmail.com`
+- GitHub: [@guptaprakhariitr](https://github.com/guptaprakhariitr)
+
+## Status
+
+- **Live status page:** [https://mcp-hub.atlasword.workers.dev/status](https://mcp-hub.atlasword.workers.dev/status)
+- **Machine-readable status:** [https://mcp-hub.atlasword.workers.dev/status.json](https://mcp-hub.atlasword.workers.dev/status.json)
+- **Source repo:** [https://github.com/guptaprakhariitr/uspto-patents-mcp](https://github.com/guptaprakhariitr/uspto-patents-mcp)

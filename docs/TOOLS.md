@@ -39,7 +39,7 @@ See `src/tools.ts` for the JSON Schema input.
 {
   "mcpServers": {
     "uspto-patents-mcp": {
-      "url": "https://uspto-patents-mcp.prakhar-cognizance.workers.dev/mcp",
+      "url": "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
       "headers": { "Authorization": "Bearer YOUR_API_KEY" }
     }
   }
