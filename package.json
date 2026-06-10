@@ -1,0 +1,25 @@
+{
+  "name": "uspto-patents-mcp",
+  "version": "0.2.0",
+  "private": false,
+  "description": "MCP server for US patent search via USPTO PatentsView. Search, read, assignee portfolio, citation graph. Hosted on Cloudflare Workers.",
+  "type": "module",
+  "main": "src/index.ts",
+  "homepage": "https://uspto-patents-mcp.workers.dev",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "tail": "wrangler tail"
+  },
+  "keywords": ["mcp", "mcp-server", "claude", "cursor", "uspto", "patents", "ip", "patentsview"],
+  "author": "Prakhar Gupta <prakshatechnologies@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20260101.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "wrangler": "^3.80.0"
+  }
+}

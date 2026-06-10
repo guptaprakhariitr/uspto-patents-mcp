@@ -1,0 +1,20 @@
+{
+  "$schema": "https://smithery.ai/schema/server.json",
+  "name": "uspto-patents-mcp",
+  "displayName": "USPTO Patents",
+  "description": "US patent search and full-text via USPTO PatentsView. Assignee portfolios, citation graph, weekly grant alerts.",
+  "version": "0.2.0",
+  "license": "MIT",
+  "homepage": "https://uspto-patents-mcp.workers.dev",
+  "categories": ["research", "regulatory", "ip"],
+  "tags": ["uspto", "patents", "patentsview", "ip-law", "biotech", "r-and-d"],
+  "transport": { "type": "http", "url": "https://uspto-patents-mcp.workers.dev/mcp" },
+  "auth": { "type": "bearer", "freeTier": { "monthlyCalls": 100, "ratePerMinute": 10 } },
+  "tools": ["uspto_patent_search", "uspto_read_patent", "uspto_assignee_portfolio", "uspto_citation_graph", "uspto_subscribe_grants"],
+  "pricing": { "currency": "USD", "tiers": [
+    { "name": "Free", "price": 0,  "monthlyCalls": 100 },
+    { "name": "Solo", "price": 9,  "monthlyCalls": 2000 },
+    { "name": "Team", "price": 29, "monthlyCalls": 10000 },
+    { "name": "Pro",  "price": 79, "monthlyCalls": 50000 }
+  ] }
+}

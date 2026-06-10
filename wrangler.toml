@@ -1,0 +1,33 @@
+name = "uspto-patents-mcp"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "CACHE"
+id = "2e40cc28a51c4db9b6e416574eb8f430"
+
+[[kv_namespaces]]
+binding = "USAGE"
+id = "54435ae869dd4d8daeeebd895ccc21ff"
+
+[vars]
+UPGRADE_URL = "https://uspto-patents-mcp.prakhar-cognizance.workers.dev/upgrade"
+PATENTSVIEW_BASE = "https://api.patentsview.org/api/v1"
+PRODUCT_NAME = "uspto-patents-mcp"
+DODO_PRODUCT_ID_SOLO = "pdt_0NgkT7puFCXG0hsCyM7cA"
+DODO_PRODUCT_ID_TEAM = "pdt_0NgkT7sbxhni4DPUMp2rR"
+DODO_PRODUCT_ID_PRO  = "pdt_0NgkT7uAdCYWQjxfkpKzp"
+FROM_EMAIL = "prakshatechnologies@gmail.com"
+DODO_BASE = "https://live.dodopayments.com"
+CUSTOMER_PORTAL_RETURN_URL = "https://uspto-patents-mcp.prakhar-cognizance.workers.dev/account"
+
+# Secrets:
+#   PATENTSVIEW_API_KEY     (recommended for higher rate limits)
+#   DODO_API_KEY
+#   DODO_WEBHOOK_SECRET
+#   RESEND_API_KEY          (optional)
+#   ADMIN_TOKEN
