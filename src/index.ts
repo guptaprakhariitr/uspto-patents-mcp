@@ -30,9 +30,9 @@ for (const t of buildTools()) server.register(t);
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
-    if (request.method === "GET" && url.pathname === "/health") return json({ ok: true, server: SERVER_INFO });
+    if ((request.method === "GET" || request.method === "HEAD") && url.pathname === "/health") return json({ ok: true, server: SERVER_INFO });
     if (request.method === "GET" && url.pathname === "/llms.txt") return new Response(LLMS_TXT, { headers: { "Content-Type": "text/markdown" } });
-    if (request.method === "GET" && (url.pathname === "/favicon.ico" || url.pathname === "/favicon.svg")) return handleFavicon();
+    if ((request.method === "GET" || request.method === "HEAD") && (url.pathname === "/favicon.ico" || url.pathname === "/favicon.svg")) return handleFavicon();
     if (request.method === "GET" && url.pathname === "/") return new Response(renderLanding(env, url), { headers: { "Content-Type": "text/html" } });
     if (request.method === "GET" && url.pathname === "/upgrade") return handleUpgrade(request, env, new URL(request.url).origin);
     if (request.method === "GET" && url.pathname === "/account") return withCors(await handleAccount(request, env));
@@ -96,7 +96,7 @@ const LLMS_TXT = `# uspto-patents-mcp
 - uspto_citation_graph — backward / forward citations (premium).
 - uspto_subscribe_grants — weekly grant alerts (premium).
 
-Endpoint: https://uspto-patents-mcp.workers.dev/mcp
+Endpoint: https://uspto-patents-mcp.atlasword.workers.dev/mcp
 `;
 function renderLanding(env: Env, url: URL): string {
   const productName = env.PRODUCT_NAME ?? "uspto-patents-mcp";
@@ -110,7 +110,11 @@ function renderLanding(env: Env, url: URL): string {
   return `<!doctype html><html><head><meta charset="utf-8"><title>uspto-patents-mcp</title>
 <style>body{font:16px/1.5 system-ui,sans-serif;max-width:720px;margin:4rem auto;padding:0 1rem}code{background:#f3f3f3;padding:.1em .35em;border-radius:3px}</style>${meta}
 </head>
-<body><h1>uspto-patents-mcp</h1>
+<body>
+<div style="background:#fef3c7;border:1px solid #f59e0b;color:#78350f;padding:.8em 1em;border-radius:8px;margin-bottom:1.5em;font-size:.95rem">
+  &#9888; <strong>Heads up:</strong> this product is in maintenance mode while the upstream USPTO PatentsView v1 API sunsets in 2026. Patent search may have reduced coverage during the migration.
+</div>
+<h1>uspto-patents-mcp</h1>
 <p>US patents for AI agents. From $9/mo.</p>
-<p><code>POST https://uspto-patents-mcp.workers.dev/mcp</code></p></body></html>`;
+<p><code>POST https://uspto-patents-mcp.atlasword.workers.dev/mcp</code></p></body></html>`;
 }
