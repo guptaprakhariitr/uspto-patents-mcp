@@ -202,3 +202,27 @@ MIT — see [LICENSE](LICENSE).
 - **Live status page:** [https://mcp-hub.atlasword.workers.dev/status](https://mcp-hub.atlasword.workers.dev/status)
 - **Machine-readable status:** [https://mcp-hub.atlasword.workers.dev/status.json](https://mcp-hub.atlasword.workers.dev/status.json)
 - **Source repo:** [https://github.com/guptaprakhariitr/uspto-patents-mcp](https://github.com/guptaprakhariitr/uspto-patents-mcp)
+
+
+## Install via npm (one-liner)
+
+A thin launcher is published as [`@atlasword/uspto-patents-mcp`](https://www.npmjs.com/package/@atlasword/uspto-patents-mcp) on npm. No manual URL to copy/paste:
+
+```bash
+npx -y @atlasword/uspto-patents-mcp
+```
+
+Or wire it into your MCP client:
+
+```jsonc
+{
+  "mcpServers": {
+    "uspto-patents": {
+      "command": "npx",
+      "args": ["-y", "@atlasword/uspto-patents-mcp"]
+    }
+  }
+}
+```
+
+The npm package is just a launcher — it shells out to [`mcp-remote`](https://www.npmjs.com/package/mcp-remote) and points it at the hosted endpoint (`https://uspto-patents-mcp.atlasword.workers.dev/mcp`).

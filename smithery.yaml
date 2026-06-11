@@ -1,0 +1,67 @@
+# Smithery registry config — https://smithery.ai/docs/build/project-config/smithery-yaml
+# This is an HTTP-transport MCP server; Smithery hosts the listing and proxies
+# clients straight to our Cloudflare Workers endpoint.
+
+name: uspto-patents-mcp
+displayName: USPTO Patents
+description: |
+  US patent search and full-text via USPTO PatentsView. Assignee portfolios, citation graph, weekly grant alerts.
+homepage: https://uspto-patents-mcp.atlasword.workers.dev
+repository: https://github.com/guptaprakhariitr/uspto-patents-mcp
+license: MIT
+version: "0.2.0"
+
+runtime: container
+
+startCommand:
+  type: http
+  url: https://uspto-patents-mcp.atlasword.workers.dev/mcp
+  configSchema:
+    type: object
+    properties:
+      apiKey:
+        type: string
+        title: API key (optional)
+        description: |
+          Bearer token from https://uspto-patents-mcp.atlasword.workers.dev/upgrade.
+          Leave blank for the anonymous free tier (~100 calls/month/IP).
+    required: []
+  exampleConfig:
+    apiKey: ""
+  commandFunction: |-
+    (config) => ({
+      type: "http",
+      url: "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
+      headers: config.apiKey ? { Authorization: `Bearer ${config.apiKey}` } : {}
+    })
+
+remote:
+  type: http
+  url: https://uspto-patents-mcp.atlasword.workers.dev/mcp
+
+categories:
+  - research
+  - regulatory
+  - ip
+tags:
+  - uspto
+  - patents
+  - patentsview
+  - ip-law
+  - biotech
+  - r-and-d
+
+tools:
+  - name: uspto_patent_search
+  - name: uspto_read_patent
+  - name: uspto_assignee_portfolio
+  - name: uspto_citation_graph
+  - name: uspto_subscribe_grants
+
+auth:
+  type: bearer
+  required: false
+  description: |
+    Optional. Anonymous free tier works for ~100 calls/month per IP. For higher
+    quotas, grab a key from https://uspto-patents-mcp.atlasword.workers.dev/upgrade and pass
+    it as `Authorization: Bearer <key>`.
