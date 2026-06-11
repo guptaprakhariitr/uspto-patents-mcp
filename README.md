@@ -206,10 +206,10 @@ MIT — see [LICENSE](LICENSE).
 
 ## Install via npm (one-liner)
 
-A thin launcher is published as [`@atlasword/uspto-patents-mcp`](https://www.npmjs.com/package/@atlasword/uspto-patents-mcp) on npm. No manual URL to copy/paste:
+A thin launcher is published as [`@insnapsprakhar/uspto-patents-mcp`](https://www.npmjs.com/package/@insnapsprakhar/uspto-patents-mcp) on npm. No manual URL to copy/paste:
 
 ```bash
-npx -y @atlasword/uspto-patents-mcp
+npx -y @insnapsprakhar/uspto-patents-mcp
 ```
 
 Or wire it into your MCP client:
@@ -219,7 +219,7 @@ Or wire it into your MCP client:
   "mcpServers": {
     "uspto-patents": {
       "command": "npx",
-      "args": ["-y", "@atlasword/uspto-patents-mcp"]
+      "args": ["-y", "@insnapsprakhar/uspto-patents-mcp"]
     }
   }
 }
