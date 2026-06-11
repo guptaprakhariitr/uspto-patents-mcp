@@ -14,12 +14,12 @@
   },
   "packages": [
     {
-      "registry_name": "remote",
-      "name": "uspto-patents-mcp",
-      "version": "0.2.0",
-      "runtime_hint": "http",
-      "remote_url": "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
-      "transport_type": "http"
+      "registryType": "npm",
+      "identifier": "@insnapsprakhar/uspto-patents-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
     }
   ],
   "remotes": [
@@ -40,5 +40,6 @@
     "ip-law",
     "biotech",
     "r-and-d"
-  ]
+  ],
+  "version": "0.0.2"
 }
