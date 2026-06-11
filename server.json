@@ -1,44 +1,28 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.guptaprakhariitr/uspto-patents-mcp",
-  "description": "US patent search and full-text via USPTO PatentsView. Assignee portfolios, citation graph, weekly grant alerts.",
-  "status": "active",
+  "title": "USPTO Patents",
+  "description": "US patent search, assignee portfolios, and citation graph via PatentsView.",
+  "version": "0.2.0",
+  "websiteUrl": "https://uspto-patents-mcp.atlasword.workers.dev/",
   "repository": {
     "url": "https://github.com/guptaprakhariitr/uspto-patents-mcp",
     "source": "github"
   },
-  "version_detail": {
-    "version": "0.2.0",
-    "release_date": "2026-06-10T00:00:00Z",
-    "is_latest": true
-  },
-  "packages": [
-    {
-      "registry_name": "remote",
-      "name": "uspto-patents-mcp",
-      "version": "0.2.0",
-      "runtime_hint": "http",
-      "remote_url": "https://uspto-patents-mcp.atlasword.workers.dev/mcp",
-      "transport_type": "http"
-    }
-  ],
   "remotes": [
     {
-      "transport_type": "http",
+      "type": "streamable-http",
       "url": "https://uspto-patents-mcp.atlasword.workers.dev/mcp"
     }
   ],
-  "categories": [
-    "research",
-    "regulatory",
-    "ip"
-  ],
-  "tags": [
-    "uspto",
-    "patents",
-    "patentsview",
-    "ip-law",
-    "biotech",
-    "r-and-d"
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@insnapsprakhar/uspto-patents-mcp",
+      "version": "0.2.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
   ]
 }
