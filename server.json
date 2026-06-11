@@ -3,7 +3,7 @@
   "name": "io.github.guptaprakhariitr/uspto-patents-mcp",
   "title": "USPTO Patents",
   "description": "US patent search, assignee portfolios, and citation graph via PatentsView.",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "websiteUrl": "https://uspto-patents-mcp.atlasword.workers.dev/",
   "repository": {
     "url": "https://github.com/guptaprakhariitr/uspto-patents-mcp",
@@ -13,16 +13,6 @@
     {
       "type": "streamable-http",
       "url": "https://uspto-patents-mcp.atlasword.workers.dev/mcp"
-    }
-  ],
-  "packages": [
-    {
-      "registryType": "npm",
-      "identifier": "@insnapsprakhar/uspto-patents-mcp",
-      "version": "0.2.0",
-      "transport": {
-        "type": "stdio"
-      }
     }
   ]
 }
